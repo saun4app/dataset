@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from dataset import connect
 from dataset.util import DatasetException
+from dataset.persistence.query import DatasetSelect
 
 from .sample_data import TEST_DATA, TEST_CITY_1
 
@@ -447,6 +448,46 @@ class RowTypeTestCase(unittest.TestCase):
             c += 1
             assert isinstance(row, Constructor), row
         assert c == len(self.tbl)
+
+
+class DatasetSelectTestCase(unittest.TestCase):
+    def setUp(self):
+        os.environ.setdefault('DATABASE_URL', 'sqlite:///:memory:')
+        self.db = connect(os.environ['DATABASE_URL'])
+        self.tbl = self.db['weather']
+        for row in TEST_DATA:
+            self.tbl.insert(row)
+            # self.t_object = DatasetSelect(self.db)
+
+    def test_select(self):
+        t_object = DatasetSelect(self.db)
+        where_text = " place = '{0}' ".format(TEST_CITY_1)
+        r = t_object.table('weather').where(where_text).select()
+        self.assertEqual(3, len(r))
+
+        t_object = DatasetSelect(self.db)
+        where_text = "place = '{0}' ".format(TEST_CITY_1)
+        r = t_object.table('weather').where(where_text).limit(2).select()
+        self.assertEqual(2, len(r))
+
+        t_object = DatasetSelect(self.db)
+        where_text = "place = '{0}' ".format(TEST_CITY_1)
+        r = t_object.table('weather').where(where_text).limit(1).select()
+        self.assertEqual(1, len(r))
+
+        t_object = DatasetSelect(self.db)
+        r = t_object.table('weather').column('place').distinct(True).select()
+        self.assertEqual(2, len(r))
+
+        t_object = DatasetSelect(self.db)
+        r = t_object.table('weather').column(['place', 'date']).distinct(True).select()
+        self.assertEqual(6, len(r))
+
+        t_object = DatasetSelect(self.db)
+        r = t_object.table('weather').column('COUNT(*) AS num').select()
+        r_dict = r[0]
+        row_count = r_dict['num']
+        self.assertEqual(row_count, len(TEST_DATA))
 
 
 if __name__ == '__main__':
