@@ -424,5 +424,18 @@ class RowTypeTestCase(unittest.TestCase):
         assert c == len(self.tbl)
 
 
+class DatasetSelectTestCase(unittest.TestCase):
+
+    def setUp(self):
+        os.environ.setdefault('DATABASE_URL', 'sqlite:///:memory:')
+        self.db = connect(os.environ['DATABASE_URL'])
+        self.tbl = self.db['weather']
+        for row in TEST_DATA:
+            self.tbl.insert(row)
+
+    def test_select(self):
+        r = self.table('weather').column('COUNT(*) AS num')[0]
+        assert r['num'] == len(TEST_DATA), r
+
 if __name__ == '__main__':
     unittest.main()

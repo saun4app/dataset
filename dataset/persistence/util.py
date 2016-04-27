@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 try:
     from urlparse import urlparse
@@ -89,3 +90,16 @@ def safe_url(url):
         pwd = ':%s@' % parsed.password
         url = url.replace(pwd, ':*****@')
     return url
+
+
+def get_select_result(query_result, result_type='dict_list'):
+    result_object = query_result
+
+    try:
+        if result_type in ['dict_list', 'json']:
+            result_json = json.dumps([dict(r) for r in query_result])
+            result_object = (json.loads(result_json), result_json)['json' == result_type]
+    except:
+        pass
+
+    return (result_object)

@@ -35,7 +35,9 @@ setup(
         'alembic >= 0.6.2',
         'normality >= 0.2.2',
         "PyYAML >= 3.10",
-        "six >= 1.7.3"
+        "six >= 1.7.3",
+        "collections-extended >= 0.7, <1",
+        "sqlize >= 0.1, <1"
     ] + py26_dependency,
     tests_require=[],
     test_suite='test',
